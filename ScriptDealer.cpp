@@ -5,6 +5,19 @@
 #include <filesystem>
 #include "ScriptDealer.h"
 #include "String.h"
+#include "MyFile.h"
+std::string ScriptDealer::GetLastTwoCharacters( std::string& str)
+{
+    if (str.length() >= 2)
+    {
+        return str.substr(str.length() - 2);
+    }
+    else
+    {
+        // 字符串长度小于2，返回整个字符串
+        return str;
+    }
+}
 
 void ScriptDealer::splitFirstSpaceInFile(const std::string &fileName) {
         std::ifstream inputFile(fileName); // Open file
@@ -18,7 +31,7 @@ void ScriptDealer::splitFirstSpaceInFile(const std::string &fileName) {
                     std::string secondPart = line.substr(spacePosition + 1);
                     std::cout << "First part after space split: " << firstPart << std::endl;
                     std::size_t commaPosition = 0;
-                    std::vector<std::string> sections;
+
                     while ((commaPosition = secondPart.find(',')) != std::string::npos) {
                         sections.push_back(secondPart.substr(0, commaPosition));
                         secondPart = secondPart.substr(commaPosition + 1);
@@ -27,14 +40,14 @@ void ScriptDealer::splitFirstSpaceInFile(const std::string &fileName) {
                     if (firstPart=="addC")
                     {
                         for (std::size_t idx = 0; idx < sections.size(); ++idx) {
-                            std::cout << "Section " << (idx+1) << ": " << sections[idx] << std::endl;
+                            std::cout << "add File " << (idx+1) << ": " << sections[idx] << std::endl;
                             addFile(sections[idx],"./"+sections[idx],"1");
                         }
                     }
                     if (firstPart=="addH")
                     {
                         for (std::size_t idx = 0; idx < sections.size(); ++idx) {
-                            std::cout << "Section " << (idx+1) << ": " << sections[idx] << std::endl;
+                            std::cout << "add File" << (idx+1) << ": " << sections[idx] << std::endl;
                             addFile(sections[idx],"./"+sections[idx],"5");
                         }
                     }
@@ -42,25 +55,24 @@ void ScriptDealer::splitFirstSpaceInFile(const std::string &fileName) {
                     if (firstPart=="addClass")
                     {
                         for (std::size_t idx = 0; idx < sections.size(); ++idx) {
-                            std::cout << "Section " << (idx+1) << ": " << sections[idx] << std::endl;
+                            std::cout << "add Class" << (idx+1) << ": " << sections[idx] << std::endl;
                             addC(sections[idx] );
                             addH(sections[idx] );
                         }
                     }
                     else
-                    if (firstPart=="addD")
+                    if (firstPart=="use")
                     {
                         std::filesystem::path currentPath = std::filesystem::current_path();  // 获取当前路径
                         std::vector<std::string> added;
                         for (std::size_t idx = 0; idx < sections.size(); ++idx) {
-
                             if (contains(added,sections[idx]))
                             {
                                 pr "skip ";
                                 lnprint(sections[idx]);
                                 continue;
                             }
-                            std::cout << "Section " << (idx+1) << ": " << sections[idx] << std::endl;
+                            std::cout << "use package" << (idx+1) << ": " << sections[idx] << std::endl;
                             added.push_back(sections[idx]);
                             auto arras=respos[sections[idx]];
                             if (arras[3]=="d")
@@ -75,8 +87,9 @@ void ScriptDealer::splitFirstSpaceInFile(const std::string &fileName) {
                             {
                                 addFile(arras[1]+".h",arras[0]+arras[1]+".h","5");
                                 insertCustomStringAtFirstLine(arras[0]+arras[1]+".h",headName);
-                                copyFile(arras[0]+arras[1]+".h","E:\\Keil_v5\\C251\\INC\\"+arras[1]+".h");
-                                copyFile(arras[0]+arras[1]+".h","E:\\Keil_v5\\C51\\INC\\"+arras[1]+".h");
+                                copyFile(arras[0]+arras[1]+".h",currentPath.string()+"\\"+arras[1]+".h");
+/*                                copyFile(arras[0]+arras[1]+".h","E:\\Keil_v5\\C251\\INC\\"+arras[1]+".h");
+                                copyFile(arras[0]+arras[1]+".h","E:\\Keil_v5\\C51\\INC\\"+arras[1]+".h");*/
                                 copyFile(arras[0]+arras[1]+".h","D:\\OneDrive - jxstnu.edu.cn\\keil\\respocity\\HEADS\\"+arras[1]+".h");
                             }
                             addd:
@@ -86,6 +99,13 @@ void ScriptDealer::splitFirstSpaceInFile(const std::string &fileName) {
                                     sections.push_back(item);
                             }
                         }
+                    }
+                    else if (firstPart=="addD")
+                    {
+                        addD("");
+                    } else if (firstPart=="addDs")
+                    {
+
                     }
                     if (firstPart=="setResP")
                     {
@@ -197,4 +217,25 @@ bool ScriptDealer::copyFile(std::string sourceFile, std::string destinationFile)
 
 bool ScriptDealer::contains(const std::vector<std::string> &vec, std::string n) {
     return std::find(vec.begin(), vec.end(), n) != vec.end();
+}
+
+void ScriptDealer::addD(std::string path) {
+    for (std::size_t idx = 0; idx < sections.size(); ++idx) {
+        auto files=ListFiles("./"+sections[idx]);
+        lnprint(files[0]);
+        for (int i = 0; i < files.size(); ++i) {
+            auto f=files[i];
+            if (GetLastTwoCharacters(f)==".c")
+            {
+                lnprint("it's a .c file ")
+                addFile(f,"./"+sections[idx]+"/"+f,"1");
+            }else if (GetLastTwoCharacters(f)==".h")
+            {
+                lnprint("it's a .h file ")
+                addFile(f,"./"+sections[idx]+"/"+f,"5");
+            }
+        }
+
+    }
+
 }

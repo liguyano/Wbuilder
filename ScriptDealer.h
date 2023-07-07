@@ -29,6 +29,9 @@ public:
 private:
     void insertCustomStringAtFirstLine(std::string fileName, std::string customString);
     void splitFirstSpaceInFile(const std::string &fileName);
+    std::string GetLastTwoCharacters(std::string& str);
+    void addD(std::string path);
+    std::vector<std::string> sections;
 public:
     ScriptDealer(std::string filePath);
     void run();
