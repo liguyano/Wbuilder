@@ -20,3 +20,25 @@ std::vector<std::string> ListFiles(const std::string& path)
 
     return files;
 }
+std::vector<std::string> GetFilesInFolder(std::string folderPath,  std::string prefix )
+{
+    std::vector<std::string> files;
+
+    for (const auto& entry : fs::directory_iterator(folderPath))
+    {
+        if (entry.is_regular_file())
+        {
+            std::string filePath = prefix + entry.path().filename().string();
+            files.push_back(filePath);
+        }
+        else if (entry.is_directory())
+        {
+            std::string subFolderPath = entry.path().string();
+            std::string subFolderPrefix = prefix + entry.path().filename().string() + "/";
+            std::vector<std::string> subFiles = GetFilesInFolder(subFolderPath, subFolderPrefix);
+            files.insert(files.end(), subFiles.begin(), subFiles.end());
+        }
+    }
+
+    return files;
+}

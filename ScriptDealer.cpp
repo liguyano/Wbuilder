@@ -29,9 +29,9 @@ void ScriptDealer::splitFirstSpaceInFile(const std::string &fileName) {
                 if (spacePosition != std::string::npos) {
                     std::string firstPart = line.substr(0, spacePosition);
                     std::string secondPart = line.substr(spacePosition + 1);
-                    std::cout << "First part after space split: " << firstPart << std::endl;
+                    std::cout << "Command: " << firstPart << std::endl;
                     std::size_t commaPosition = 0;
-
+                    sections.clear();
                     while ((commaPosition = secondPart.find(',')) != std::string::npos) {
                         sections.push_back(secondPart.substr(0, commaPosition));
                         secondPart = secondPart.substr(commaPosition + 1);
@@ -105,6 +105,23 @@ void ScriptDealer::splitFirstSpaceInFile(const std::string &fileName) {
                         addD("");
                     } else if (firstPart=="addDs")
                     {
+                        for (std::size_t idx = 0; idx < sections.size(); ++idx) {
+                            auto files=GetFilesInFolder("./"+sections[idx],"");
+                            lnprint(files[0]);
+                            for (int i = 0; i < files.size(); ++i) {
+                                auto f=files[i];
+                                if (GetLastTwoCharacters(f)==".c")
+                                {
+                                    lnprint("it's a .c file ")
+                                    addFile(f,"./"+sections[idx]+"/"+f,"1");
+                                }else if (GetLastTwoCharacters(f)==".h")
+                                {
+                                    lnprint("it's a .h file ")
+                                    addFile(f,"./"+sections[idx]+"/"+f,"5");
+                                }
+                            }
+
+                        }
 
                     }
                     if (firstPart=="setResP")
@@ -220,19 +237,34 @@ bool ScriptDealer::contains(const std::vector<std::string> &vec, std::string n) 
 }
 
 void ScriptDealer::addD(std::string path) {
-    for (std::size_t idx = 0; idx < sections.size(); ++idx) {
-        auto files=ListFiles("./"+sections[idx]);
-        lnprint(files[0]);
-        for (int i = 0; i < files.size(); ++i) {
-            auto f=files[i];
+    for (std::size_t idx = 0; idx < sections.size(); idx+=2) {
+        auto filess=ListFiles("./"+sections[idx]);
+        lnprint(filess[0]);
+        auto target= this->files->Parent()->Parent();
+        auto Group=new TiXmlElement("Group");
+        auto groupName=new TiXmlElement("GroupName");
+        auto fis=new TiXmlElement("Files");
+        if (filess.size()>0)
+        {
+            groupName->LinkEndChild(new TiXmlText(sections[idx+1].c_str()));
+            Group->LinkEndChild(groupName);
+            Group->LinkEndChild(fis);
+            target->LinkEndChild(Group);
+            addInclude(sections[idx]);
+        }
+        for (int i = 0; i < filess.size(); ++i) {
+            auto f=filess[i];
             if (GetLastTwoCharacters(f)==".c")
             {
                 lnprint("it's a .c file ")
-                addFile(f,"./"+sections[idx]+"/"+f,"1");
+                auto f1=makeFile(f,f,"1");
+                pr "f";
+                lnprint(f);
+                fis->LinkEndChild(f1);
             }else if (GetLastTwoCharacters(f)==".h")
             {
                 lnprint("it's a .h file ")
-                addFile(f,"./"+sections[idx]+"/"+f,"5");
+                fis->LinkEndChild( makeFile(f,f,"5"));
             }
         }
 

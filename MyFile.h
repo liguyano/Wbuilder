@@ -7,4 +7,5 @@
 #include <filesystem>
 #include <iostream>
 std::vector<std::string> ListFiles(const std::string& path);
+std::vector<std::string> GetFilesInFolder(std::string folderPath, std::string prefix = "");
 #endif //WBUILDER_MYFILE_H
